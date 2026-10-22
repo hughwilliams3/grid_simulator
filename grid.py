@@ -187,13 +187,14 @@ def add_asset(graph, obj, x, y): #graph = state.graph, obj is a consumer or prod
     graph.add_node(obj.name, obj=obj, x=x, y=y)
     return obj
 
-def build_graph(state, nodes, positions): # nodes is a list of consumer or generator objects, coords is a list of tuples
+def build_grid(state, nodes, positions): # nodes is a list of consumer or generator objects, coords is a list of tuples
     for obj in nodes:
         x, y = positions[obj.name]
         add_asset(state.graph, obj, x, y)
-    for u,v in zip(state.graph.nodes, state.graph.nodes):
-        state.graph.add_edge(u,v)
-
+    for u in state.graph.nodes:
+        for v in state.graph.nodes:
+            if v in u.neighbors:
+                state.graph.add_edge(u,v)
 
 def step(state = SimState):
     # update time
@@ -210,7 +211,6 @@ def step(state = SimState):
             ast.update_demand(get_temp(state.temp_z), state.time, state.rng.gauss(0,1))
             print(ast.demand)
 
-
 ### Testing ground
 # define the nodes and their coordinates
 #consumers
@@ -223,32 +223,44 @@ array1 = Solar("array1")
 nuke1 = Nuclear("nuke1")
 gas1 = Gas("gas1")
 
-
 # transmission
 transformer1 = Transformer("transformer1")
 hvdc1 = PowerLine("hvdc1", mill1, transformer1, 200)
 
-assets = [mill1, array1, town1, factory1, town2, nuke1, gas1, transformer1, hvdc1]
+assets = [mill1, array1, town1, factory1, town2, nuke1, gas1, transformer1] # assets should just be the nodes
 
 state = SimState() #initialize state
 state.assets = assets
 
 positions = {
-    "mill1": (1,1),
-    "array1": (2,2),
-    "town1": (3,3),
-    "factory1": (4,4),
-    "town2": (5,5)
+    "mill1": (.6,.5),
+    "array1": (.3,.3),
+    "town1": (.4,.5),
+    "factory1": (.4,.2),
+    "town2": (.2,.9),
+    "nuke1": (.1, .8),
+    "gas1": (.3, .2),
+    "transformer1": (.45, .55)
 }
 
-#print(f"before: {state.graph}")
+neighbors = [
+    (mill1,transformer1),
+    (array1,transformer1),
+    (nuke1, transformer1),
+    (gas1, transformer1),
+    (transformer1, town1),
+    (transformer1, town2),
+    (transformer1, factory1)
+]
 
-#build_graph(state, assets, positions) # build the graph
+print(f"before: {state.graph}")
 
-#print(f"after: {state.graph}")
+build_grid(state, assets, positions,) # build the graph
+
+print(f"after: {state.graph.edges}")
 
 
-for t in range(1000): # run some simulation steps
+for t in range(1): # run some simulation steps
   
     # state update
     step(state)
