@@ -187,14 +187,17 @@ def add_asset(graph, obj, x, y): #graph = state.graph, obj is a consumer or prod
     graph.add_node(obj.name, obj=obj, x=x, y=y)
     return obj
 
-def build_grid(state, nodes, positions): # nodes is a list of consumer or generator objects, coords is a list of tuples
+def build_grid(state, nodes, positions, neighbors): # nodes is a list of consumer or generator objects, coords is a list of tuples
     for obj in nodes:
         x, y = positions[obj.name]
         add_asset(state.graph, obj, x, y)
     for u in state.graph.nodes:
         for v in state.graph.nodes:
-            if v in u.neighbors:
+            if (u, v) in neighbors:
+                print(f"edge (u,v) added : {(u,v)}")
                 state.graph.add_edge(u,v)
+            else:
+                print("shit")
 
 def step(state = SimState):
     # update time
@@ -244,20 +247,21 @@ positions = {
 }
 
 neighbors = [
-    (mill1,transformer1),
-    (array1,transformer1),
-    (nuke1, transformer1),
-    (gas1, transformer1),
-    (transformer1, town1),
-    (transformer1, town2),
-    (transformer1, factory1)
+    ("mill1", "transformer1"),
+    ("array1","transformer1"),
+    ("nuke1", "transformer1"),
+    ("gas1", "transformer1"),
+    ("transformer1", "town1"),
+    ("transformer1", "town2"),
+    ("transformer1", "factory1")
 ]
 
-print(f"before: {state.graph}")
+print(f"nodes: {state.graph.nodes}")
 
-build_grid(state, assets, positions,) # build the graph
+build_grid(state, assets, positions, neighbors) # build the graph
 
-print(f"after: {state.graph.edges}")
+print(f"nodes: {state.graph.nodes}")
+print(f"edges: {state.graph.edges}")
 
 
 for t in range(1): # run some simulation steps

@@ -8,7 +8,12 @@ ctx = canvas.getContext("2d")
 state = build_grid()
 
 def draw_edges(state, w, h):
-    pass
+    for edge in state.graph.edges(data = True):
+        u = edge[0]
+        v = edge[1]
+        G = state.graph
+        ctx.beginPath()
+        ctx.moveTo(G.nodes[u]['x'])
 
 def draw_nodes(state, w, h):
     pass
@@ -31,5 +36,4 @@ async def run():
         draw(state)
         await asyncio.sleep(0.1)
 
-
-await run()
+run()
